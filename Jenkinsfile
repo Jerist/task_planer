@@ -5,7 +5,7 @@ pipeline {
         jdk 'JDK-17'          // должно совпадать
     }
     parameters {
-        string(name: 'BRANCH', defaultValue: 'developer', description: 'Branch to build')
+        string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to build')
     }
     environment {
         PUBLISH_DIR = "/Users/jerist/JenkinsPublished"
@@ -31,7 +31,7 @@ pipeline {
         }
         stage('Static Analysis') {
             when {
-                expression { params.BRANCH == 'developer' }
+                expression { params.BRANCH == 'main' }
             }
             steps {
                 sh 'mvn checkstyle:check || echo "Checkstyle skipped"'
