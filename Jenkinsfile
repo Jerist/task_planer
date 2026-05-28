@@ -1,5 +1,9 @@
 pipeline {
     agent any
+    tools {
+        maven 'Maven-3.8.6'   // замените на точное имя, которое вы дали в Jenkins Tools
+        jdk 'JDK-17'        // замените на точное имя JDK
+    }
     parameters {
         string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Branch to build')
     }
