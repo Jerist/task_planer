@@ -1,11 +1,14 @@
 pipeline {
     agent any
     tools {
-        maven 'Maven-3.8.6'   // замените на точное имя, которое вы дали в Jenkins Tools
-        jdk 'JDK-17'        // замените на точное имя JDK
+        maven 'Maven-3.8.6'
+        jdk 'JDK-17'
     }
     parameters {
         string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Branch to build')
+    }
+    environment {
+        PUBLISH_DIR = "/Users/jerist/JenkinsPublished"
     }
     stages {
         stage('Checkout') {
@@ -19,15 +22,8 @@ pipeline {
             }
         }
         stage('Test') {
-            when { expression { params.BRANCH_NAME.startsWith('feature/') } }
             steps {
                 sh 'mvn test'
-            }
-        }
-        stage('Static Analysis') {
-            when { expression { params.BRANCH_NAME == 'developer' } }
-            steps {
-                sh 'mvn checkstyle:check || true'
             }
         }
         stage('Coverage Report') {
@@ -35,9 +31,9 @@ pipeline {
                 sh 'mvn jacoco:report'
             }
         }
-        stage('Install Artifact') {
+        stage('Install') {
             steps {
-                sh 'mvn install -DskipTests'
+                sh 'mvn install -Dmaven.test.skip=true'  // тесты уже запущены, можно пропустить
             }
         }
         stage('Coverage Check') {
@@ -47,8 +43,12 @@ pipeline {
         }
         stage('Publish Artifacts') {
             steps {
-                sh 'mkdir -p ./published && cp cli/target/*.jar ./published/'
-                archiveArtifacts artifacts: 'published/*.jar'
+                sh """
+                    mkdir -p ${PUBLISH_DIR}
+                    cp cli/target/*.jar ${PUBLISH_DIR}/
+                    cp core/target/*.jar ${PUBLISH_DIR}/ || true
+                """
+                archiveArtifacts artifacts: 'cli/target/*.jar, core/target/*.jar'
             }
         }
     }
