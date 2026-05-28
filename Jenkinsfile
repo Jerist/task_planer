@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: params.BRANCH, url: 'https://github.com/Jerist/task_planner.git'
+                git branch: params.BRANCH, url: 'https://github.com/Jerist/task_planer.git'
             }
         }
         stage('Compile') {
