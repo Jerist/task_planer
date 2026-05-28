@@ -1,19 +1,12 @@
 pipeline {
     agent any
-    tools {
-        maven 'Maven-3.8.6'   // должно совпадать с именем в Jenkins Tools
-        jdk 'JDK-17'          // должно совпадать
-    }
     parameters {
-        string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to build')
-    }
-    environment {
-        PUBLISH_DIR = "/Users/jerist/JenkinsPublished"
+        string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Branch to build')
     }
     stages {
         stage('Checkout') {
             steps {
-                git branch: params.BRANCH, url: 'https://github.com/Jerist/task_planer.git'
+                git branch: params.BRANCH_NAME, url: 'https://github.com/Jerist/task_planer.git'
             }
         }
         stage('Compile') {
@@ -22,19 +15,15 @@ pipeline {
             }
         }
         stage('Test') {
-            when {
-                expression { params.BRANCH.startsWith('feature/') }
-            }
+            when { expression { params.BRANCH_NAME.startsWith('feature/') } }
             steps {
                 sh 'mvn test'
             }
         }
         stage('Static Analysis') {
-            when {
-                expression { params.BRANCH == 'main' }
-            }
+            when { expression { params.BRANCH_NAME == 'developer' } }
             steps {
-                sh 'mvn checkstyle:check || echo "Checkstyle skipped"'
+                sh 'mvn checkstyle:check || true'
             }
         }
         stage('Coverage Report') {
@@ -54,12 +43,8 @@ pipeline {
         }
         stage('Publish Artifacts') {
             steps {
-                sh """
-                    mkdir -p ${PUBLISH_DIR}
-                    cp cli/target/*.jar ${PUBLISH_DIR}/
-                    cp core/target/*.jar ${PUBLISH_DIR}/ || true
-                """
-                archiveArtifacts artifacts: 'cli/target/*.jar, core/target/*.jar'
+                sh 'mkdir -p ./published && cp cli/target/*.jar ./published/'
+                archiveArtifacts artifacts: 'published/*.jar'
             }
         }
     }
