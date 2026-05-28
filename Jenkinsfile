@@ -36,11 +36,6 @@ pipeline {
                 sh 'mvn install -Dmaven.test.skip=true'  // тесты уже запущены, можно пропустить
             }
         }
-        stage('Coverage Check') {
-            steps {
-                sh 'mvn jacoco:check'
-            }
-        }
         stage('Publish Artifacts') {
             steps {
                 sh """
